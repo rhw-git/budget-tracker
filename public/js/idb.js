@@ -1,7 +1,7 @@
 // create variable to hold db connection
 let db;
-// establish a connection to IndexedDB database called "Transaction"
-const request = indexedDB.open('transaction', 1);
+// establish a connection to IndexedDB database called "budget_tracker"
+const request = indexedDB.open('budget_tracker', 1);
 
 // this event will emit if the database version changes
 request.onupgradeneeded = function (event) {
@@ -19,6 +19,7 @@ request.onsuccess = function (event) {
     //uploadTranscation();
   }
 };
+
 request.onerror = function (event) {
   console.log(event.target.errorCode);
 };
@@ -26,7 +27,9 @@ request.onerror = function (event) {
 // when there is no internet connection
 function saveRecord(record) {
   // open a new transaction with the database with read and write permissions
+  console.log(db);
   const transaction = db.transaction(['new_transaction'], 'readwrite');
+
   // access the object store for "new_transaction"
   const transactionObjectStore = transaction.ObjectStore('new_transaction');
   // add record to your store with add method
