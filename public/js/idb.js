@@ -16,7 +16,7 @@ request.onsuccess = function (event) {
   db = event.target.result;
   // check if app is online, if yes run uploadTranscation() function to send all local db data to api
   if (navigator.onLine) {
-    //uploadTranscation();
+    uploadTranscation();
   }
 };
 
@@ -33,3 +33,54 @@ function saveRecord(record) {
   // add record to your store with add method
   transactionObjectStore.add(record);
 }
+
+// upload all offline data to MongoDB
+function uploadTranscation() {
+  // open a new transaction with the database with read and write permissions
+  let transaction = db.transaction(['new_transaction'], 'readwrite');
+  // access object store of indexdDB
+  let transactionObjectStore = transaction.objectStore('new_transaction');
+  // get all records from store and set to a variable
+  const getAll = transactionObjectStore.getAll();
+  // upon a successful .getAll() execution, run this function
+  getAll.onsuccess = function () {
+    // if there was data in the indexedDB's store, send it to api server
+    if (getAll.result.length > 0) {
+      // also send to server
+      fetch('/api/transaction', {
+        method: 'POST',
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          if (data.errors) {
+            errorEl.textContent = 'Missing Information';
+          } else {
+            // open one more transaction
+            let transaction = db.transaction(['new_transaction'], 'readwrite');
+            // access the new_transaction object store
+            let transactionObjectStore = transaction.objectStore(
+              'new_transaction',
+            );
+            // clear object store
+            transactionObjectStore.clear();
+            nameEl.value = '';
+            amountEl.value = '';
+            alter('local stored transactions has been updated to the server');
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+}
+
+// listen for app coming back online
+window.addEventListener('online', uploadTranscation);
