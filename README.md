@@ -31,8 +31,8 @@ MIT
 
 ## GitHub
 
-My GitHub link: ( https://github.com/rhw-git/budget-tracker)
+My GitHub link: (https://github.com/rhw-git/budget-tracker)
 
 ## Heroku
 
-My Heroku link: ( )
+My Heroku link: (https://still-waters-21923.herokuapp.com/ )
